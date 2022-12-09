@@ -50,21 +50,31 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 if (result?.ids) {
                     // jodi ids property thake ?
                     return [
-                        { type: "User", id: "LIST" },
+                        { type: "User", id: "LIST" }, //🔴 we had the List
                         ...result.ids.map((id) => ({ type: "User", id })), // id gula push kore dilam 🔴 bujhte hobe jinish ta
+                        // 🔴 we also map over the ids, so, we can invalidates as well
                     ];
                 } else return [{ type: "User", id: "LIST" }]; // fail safe
             },
+            /**
+             * remember .. we specified ids and as well as the list here inside of the
+             * providesTags .. for our getUsersQuery
+             */
         }),
         addNewUser: builder.mutation({
             query: (initialUserData) => ({
                 url: "/users",
                 method: "POST",
                 body: {
-                    ...initialUserData,
+                    ...initialUserData, // data ta pass kortesi .. jeta form theke ashse
                 },
             }),
             invalidatesTags: [{ type: "User", id: "LIST" }],
+            /**
+             * we are invalidating tags now .. so, this will force the cache that we are
+             * using with rtk query and redux to update .. and what we are doing is saying
+             * the User List will be invalidated ... so , that will need to be updated ..
+             */
         }),
         updateUser: builder.mutation({
             query: (initialUserData) => ({
@@ -76,22 +86,30 @@ export const usersApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: (result, error, arg) => [
                 { type: "User", id: arg.id },
+                // amra kono list invalidate kortesi na .. amra id invalidate kortesi
+                // id of the User that we are passing in ... and we get that with arg
+                // parameter ..
+                // and it invalidates that one user id .. so , we know that needs updated
+                // again ..
             ],
         }),
         deleteUser: builder.mutation({
+            // full initialUserData send korar bodole .. shudhu id pass korlam
+            // destructuring kore dilam ..
             query: ({ id }) => ({
                 url: `/users`,
                 method: "DELETE",
                 body: { id },
             }),
             invalidatesTags: (result, error, arg) => [
-                { type: "User", id: arg.id },
+                { type: "User", id: arg.id }, // we are invalidating specific id of user ..
             ],
         }),
     }),
 });
 
 // going to create a hook .. based on this endpoints for us .. automatically
+// rtk query automatically creates hooks for us ..
 export const {
     useGetUsersQuery,
     useAddNewUserMutation,

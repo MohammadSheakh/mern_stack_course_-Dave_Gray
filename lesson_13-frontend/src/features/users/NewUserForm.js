@@ -1,84 +1,96 @@
-import { useState, useEffect } from "react"
-import { useAddNewUserMutation } from "./usersApiSlice"
-import { useNavigate } from "react-router-dom"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave } from "@fortawesome/free-solid-svg-icons"
-import { ROLES } from "../../config/roles"
-import useTitle from "../../hooks/useTitle"
+import { useState, useEffect } from "react";
+import { useAddNewUserMutation } from "./usersApiSlice";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSave } from "@fortawesome/free-solid-svg-icons";
+import { ROLES } from "../../config/roles";
+import useTitle from "../../hooks/useTitle";
 
-const USER_REGEX = /^[A-z]{3,20}$/
-const PWD_REGEX = /^[A-z0-9!@#$%]{4,12}$/
+const USER_REGEX = /^[A-z]{3,20}$/;
+const PWD_REGEX = /^[A-z0-9!@#$%]{4,12}$/;
 
 const NewUserForm = () => {
-    useTitle('techNotes: New User')
+    useTitle("techNotes: New User");
 
-    const [addNewUser, {
-        isLoading,
-        isSuccess,
-        isError,
-        error
-    }] = useAddNewUserMutation()
+    // unlike the query it gives us the addNewUser function..
+    // we can now call when we need it .. inside the component ..
+    // er pore ekta object pai.. jeta status deliver kore function call korar
+    // pore
+    const [addNewUser, { isLoading, isSuccess, isError, error }] =
+        useAddNewUserMutation();
+    // query immediately call holeo .. ei addNewUser mutation function kintu
+    // immediately call hoy na ..
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-    const [username, setUsername] = useState('')
-    const [validUsername, setValidUsername] = useState(false)
-    const [password, setPassword] = useState('')
-    const [validPassword, setValidPassword] = useState(false)
-    const [roles, setRoles] = useState(["Employee"])
+    const [username, setUsername] = useState("");
+    const [validUsername, setValidUsername] = useState(false);
+    // amader regex standards meet korle validUsername ta true hobe ..
+    const [password, setPassword] = useState("");
+    const [validPassword, setValidPassword] = useState(false);
+    const [roles, setRoles] = useState(["Employee"]);
 
+    // userName and password validate korte kaj e lagbe ..
     useEffect(() => {
-        setValidUsername(USER_REGEX.test(username))
-    }, [username])
-
+        setValidUsername(USER_REGEX.test(username));
+    }, [username]);
     useEffect(() => {
-        setValidPassword(PWD_REGEX.test(password))
-    }, [password])
+        setValidPassword(PWD_REGEX.test(password));
+    }, [password]);
 
+    // isSuccess hoile shob form ke empty kore dibo
     useEffect(() => {
         if (isSuccess) {
-            setUsername('')
-            setPassword('')
-            setRoles([])
-            navigate('/dash/users')
+            setUsername("");
+            setPassword("");
+            setRoles([]);
+            navigate("/dash/users"); // user list e navigate korbo
         }
-    }, [isSuccess, navigate])
+    }, [isSuccess, navigate]);
 
-    const onUsernameChanged = e => setUsername(e.target.value)
-    const onPasswordChanged = e => setPassword(e.target.value)
+    // handlers gula likhbo
+    const onUsernameChanged = (e) => setUsername(e.target.value);
+    const onPasswordChanged = (e) => setPassword(e.target.value);
 
-    const onRolesChanged = e => {
+    const onRolesChanged = (e) => {
         const values = Array.from(
-            e.target.selectedOptions, //HTMLCollection 
+            e.target.selectedOptions, //HTMLCollection
             (option) => option.value
-        )
-        setRoles(values)
-    }
+        );
+        setRoles(values);
+    };
 
-    const canSave = [roles.length, validUsername, validPassword].every(Boolean) && !isLoading
+    const canSave =
+        [roles.length, validUsername, validPassword].every(Boolean) &&
+        !isLoading;
+    // shob gulai jodi true hoy and not loading hoy ...
 
     const onSaveUserClicked = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (canSave) {
-            await addNewUser({ username, password, roles })
+            await addNewUser({ username, password, roles });
+            // addNewUser mutation ta call korbo ...
         }
-    }
+    };
 
-    const options = Object.values(ROLES).map(role => {
+    // egula config file theke ashbe .. select korar option gula ..
+    const options = Object.values(ROLES).map((role) => {
         return (
-            <option
-                key={role}
-                value={role}
+            <option key={role} value={role}>
+                {" "}
+                {role}
+            </option>
+        );
+    });
 
-            > {role}</option >
-        )
-    })
-
-    const errClass = isError ? "errmsg" : "offscreen"
-    const validUserClass = !validUsername ? 'form__input--incomplete' : ''
-    const validPwdClass = !validPassword ? 'form__input--incomplete' : ''
-    const validRolesClass = !Boolean(roles.length) ? 'form__input--incomplete' : ''
-
+    // condition / state er upor base kore css class add korbo ..
+    // css class jegula amra apply korteo pari .. abar na o korte pari ..
+    const errClass = isError ? "errmsg" : "offscreen";
+    const validUserClass = !validUsername ? "form__input--incomplete" : "";
+    const validPwdClass = !validPassword ? "form__input--incomplete" : "";
+    const validRolesClass = !Boolean(roles.length)
+        ? "form__input--incomplete"
+        : "";
 
     const content = (
         <>
@@ -98,7 +110,8 @@ const NewUserForm = () => {
                     </div>
                 </div>
                 <label className="form__label" htmlFor="username">
-                    Username: <span className="nowrap">[3-20 letters]</span></label>
+                    Username: <span className="nowrap">[3-20 letters]</span>
+                </label>
                 <input
                     className={`form__input ${validUserClass}`}
                     id="username"
@@ -110,7 +123,9 @@ const NewUserForm = () => {
                 />
 
                 <label className="form__label" htmlFor="password">
-                    Password: <span className="nowrap">[4-12 chars incl. !@#$%]</span></label>
+                    Password:{" "}
+                    <span className="nowrap">[4-12 chars incl. !@#$%]</span>
+                </label>
                 <input
                     className={`form__input ${validPwdClass}`}
                     id="password"
@@ -121,23 +136,23 @@ const NewUserForm = () => {
                 />
 
                 <label className="form__label" htmlFor="roles">
-                    ASSIGNED ROLES:</label>
+                    ASSIGNED ROLES:
+                </label>
                 <select
                     id="roles"
                     name="roles"
                     className={`form__select ${validRolesClass}`}
-                    multiple={true}
-                    size="3"
+                    multiple={true} // multiple value select kora jabe
+                    size="3" // dropdown charai 3 ta value dekhabo
                     value={roles}
                     onChange={onRolesChanged}
                 >
                     {options}
                 </select>
-
             </form>
         </>
-    )
+    );
 
-    return content
-}
-export default NewUserForm
+    return content;
+};
+export default NewUserForm;

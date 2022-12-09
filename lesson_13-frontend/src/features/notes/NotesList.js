@@ -11,7 +11,7 @@ const NotesList = () => {
 
     // query hook ta use korlam...
     const {
-        data: notes,
+        data: notes, // data ke notes nam e rename kore nilam
         isLoading,
         isSuccess,
         isError,
